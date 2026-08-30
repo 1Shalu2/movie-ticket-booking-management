@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int        @id @default(autoincrement())
+  name           String
+  email          String     @unique
+  password       String
+  phone          String?    @db.VarChar(20)
+  address        String?    @db.VarChar(500)
+  city           String?    @db.VarChar(100)
+  state          String?    @db.VarChar(100)
+  pincode        String?    @db.VarChar(10)
+  dateOfBirth    DateTime?
+  profilePicture String?    @db.VarChar(500)
+  role           UserRole   @default(USER)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  bookings       Booking[]
+  payments       Payment[]
+  seatHolds      SeatHold[]
+}
+
+model Cinema {
+  id        Int      @id @default(autoincrement())
+  name      String
+  city      String?
+  createdAt DateTime @default(now())
+  screens   Screen[]
+}
+
+model Screen {
+  id       Int    @id @default(autoincrement())
+  name     String
+  cinemaId Int
+  cinema   Cinema @relation(fields: [cinemaId], references: [id])
+  shows    Show[]
+}
+
+model Movie {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  durationMin Int?
+  posterUrl   String?   @db.VarChar(500)
+  bannerUrl   String?   @db.VarChar(500)
+  trailerUrl  String?   @db.VarChar(500)
+  genre       String?   @db.VarChar(200)
+  language    String?   @db.VarChar(100)
+  rating      String?   @db.VarChar(10)
+  releaseDate DateTime?
+  director    String?   @db.VarChar(200)
+  cast        String?   @db.VarChar(500)
+  certificate String?   @db.VarChar(10)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+  shows       Show[]
+}
+
+model Show {
+  id        Int        @id @default(autoincrement())
+  movieId   Int
+  screenId  Int
+  startTime DateTime
+  price     Float
+  bookings  Booking[]
+  seatHolds SeatHold[]
+  movie     Movie      @relation(fields: [movieId], references: [id])
+  screen    Screen     @relation(fields: [screenId], references: [id])
+}
+
+model Booking {
+  id            Int           @id @default(autoincrement())
+  userId        Int
+  showId        Int
+  seats         Json
+  totalPrice    Float
+  status        BookingStatus @default(PENDING)
+  paymentId     Int?          @unique
+  paymentStatus PaymentStatus @default(PENDING)
+  ticketCode    String?       @unique @db.VarChar(50)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  payment       Payment?      @relation(fields: [paymentId], references: [id])
+  show          Show          @relation(fields: [showId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
+}
+
+model Payment {
+  id                 Int           @id @default(autoincrement())
+  userId             Int
+  amount             Float
+  currency           String        @default("inr")
+  paymentMethod      String        @default("stripe")
+  stripePaymentId    String?       @unique
+  stripeClientSecret String?
+  status             PaymentStatus @default(PENDING)
+  metadata           Json?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  booking            Booking?
+  user               User          @relation(fields: [userId], references: [id])
+}
+
+model SeatHold {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  showId    Int
+  seats     Json
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  show      Show     @relation(fields: [showId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
