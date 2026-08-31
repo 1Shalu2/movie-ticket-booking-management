@@ -48,9 +48,12 @@ app.use(express.json());
 if (process.env.NODE_ENV === 'production') {
   // In production (single service), allow same-origin requests
   app.use(cors({
-    origin: true, // Allow same origin
-    credentials: true,
-    exposedHeaders: ['Content-Disposition', 'Content-Length']
+        origin: [
+            'https://quickbook-frontend-tipz.onrender.com',
+            'https://quickbook-frontend.onrender.com'
+        ],
+        credentials: true,
+        exposedHeaders: ['Content-Disposition', 'Content-Length']
   }));
 } else {
   // In development, use strict origin checking
