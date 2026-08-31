@@ -100,18 +100,7 @@ app.use('/api/payments', paymentRoutes);
 // Admin routes (authentication and role validation handled in adminRoutes)
 app.use('/api/admin', adminRoutes);
 
-// Serve frontend in production
-if (process.env.NODE_ENV === 'production') {
-  const path = require('path');
-  
-  // Serve static files from the React app
-  app.use(express.static(path.join(__dirname, '../../frontend/dist')));
-  
-  // All other GET requests not handled before will return our React app
-  app.get(/^\/(?!api).*/, (req, res) => {
-    res.sendFile(path.join(__dirname, '../../frontend/dist', 'index.html'));
-  });
-}
+
 
 // Error handling middleware
 app.use(errorHandler);
