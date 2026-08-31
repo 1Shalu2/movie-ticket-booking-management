@@ -44,34 +44,20 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 
-// CORS configuration based on environment
-if (process.env.NODE_ENV === 'production') {
-  // In production (single service), allow same-origin requests
-  app.use(cors({
-        origin: [
-            'https://quickbook-frontend-tipz.onrender.com',
-            'https://quickbook-frontend.onrender.com'
-        ],
-        credentials: true,
-        exposedHeaders: ['Content-Disposition', 'Content-Length']
-  }));
-} else {
-  // In development, use strict origin checking
-  app.use(cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-    exposedHeaders: ['Content-Disposition', 'Content-Length']
-  }));
-}
+// CORS configuration
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'https://quickbook-frontend-tipz.onrender.com',
+    'https://quickbook-frontend.onrender.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Disposition', 'Content-Length']
+}));
 
 // Initialize Socket.io and managers
 socketManager.initialize(io);
